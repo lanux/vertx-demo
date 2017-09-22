@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>groupId</groupId>
+    <artifactId>vertx-demo</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <!--项目打包的类型，可以使jar、war、rar、ear、pom，默认是jar-->
+    <packaging>jar</packaging>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.16</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-core</artifactId>
+            <version>3.4.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-web</artifactId>
+            <version>3.4.2</version>
+        <!--
+            compile
+            默认就是compile。compile表示被依赖项目需要参与当前项目的编译，当然后续的测试，运行周期也参与其中，是一个比较强的依赖。打包的时候通常需要包含进去。
+
+            test
+            scope为test表示依赖项目仅仅参与测试相关的工作，包括测试代码的编译，执行。比较典型的如junit。
+
+            runntime
+            runntime表示被依赖项目无需参与项目的编译，不过后期的测试和运行周期需要其参与。与compile相比，跳过编译而已，
+            说实话在终端的项目（非开源，企业内部系统）中，和compile区别不是很大。比较常见的如JSR×××的实现，对应的API jar是compile的，
+            具体实现是runtime的，compile只需要知道接口就足够了。oracle jdbc驱动架包就是一个很好的例子，一般scope为runntime。
+            另外runntime的依赖通常和optional搭配使用，optional为true。我可以用A实现，也可以用B实现。
+
+            provided
+            provided意味着打包的时候可以不用包进去，别的设施(Web Container)会提供。
+            事实上该依赖理论上可以参与编译，测试，运行等周期。相当于compile，但是在打包阶段做了exclude的动作。
+
+            system
+            从参与度来说，也provided相同，不过被依赖项不会从maven仓库抓，而是从本地文件系统拿，一定需要配合systemPath属性使用。
+        -->
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>22.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.5</version>
+        </dependency>
+    </dependencies>
+
+    <!-- 继承自该项目的所有子项目的默认依赖信息。-->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>22.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.5</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <!--最终构建之后的名称-->
+        <finalName>vertx-demo</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.6.1</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!--发现依赖和扩展的远程仓库列表。-->
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>central</name>
+            <!-- 配置仓库的地址 -->
+            <url>http://172.31.80.122:8081/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>spring-snapshots</id>
+            <url>http://repo.spring.io/snapshot</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>spring-milestones</id>
+            <url>http://repo.spring.io/milestone</url>
+        </repository>
+    </repositories>
+    <!--项目发布信息，在执行mvn deploy后表示要发布的位置。有了这些信息就可以把构件部署到远程仓库。-->
+    <distributionManagement>
+        <!--部署项目产生的构件到远程仓库需要的信息-->
+        <repository>
+            <!--是分配给快照一个唯一的版本号（由时间戳和构建流水号）？还是每次都使用相同的版本号？参见repositories/repository元素-->
+            <uniqueVersion/>
+            <!-- ID要和MAVEN中conif/setting.xml 中的server保持一致 -->
+            <id>releases</id>
+            <name>User Project Release</name>
+            <!-- release版本的url地址 -->
+            <url>http://172.31.80.122:8081/nexus/content/repositories/releases/</url>
+        </repository>
+        <!--构件的快照部署到哪里？如果没有配置该元素，默认部署到repository元素配置的仓库-->
+        <snapshotRepository>
+            <!-- ID要和MAVEN中conif/setting.xml 中的server保持一致 -->
+            <id>snapshots</id>
+            <name>User Project SNAPSHOTS</name>
+            <!-- snapshot版本的url地址 -->
+            <url>http://172.31.80.122:8081/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+</project>
